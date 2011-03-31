@@ -1,0 +1,12 @@
+{ "name": "json-builder"
+, "description": "Big JSON streams without creating big objects."
+, "version": "0.0.1",
+, "homepage": "https://github.com/michaelku/json-builder",
+, "repository": { "type": "git"
+                , "url": "git://github.com/michaelku/json-builder.git"}
+, "author": "Michael Kurze <michael@thefoundation.de>"
+, "main": "json-builder.js",
+, "directories": { "lib": "." },
+, "scripts": { "test": "node test/test.js" }
+, "engines": { "node": ">=0.4.2" }
+}
