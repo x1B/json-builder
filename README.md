@@ -14,9 +14,9 @@ them.
 
 ## How do I use it?
 
-    var stream = ... // something with write(str), e.g. an HTTPResponse
+    var stream = ... // something with write(str), e.g. an HTTP response
       , jsonBuilder = require('json-builder')
-      , out = jsonBuilder.stream(response)
+      , out = jsonBuilder.stream(stream)
     out.map()
        .key('title-row')
        .list()
