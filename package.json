@@ -1,5 +1,5 @@
 { "name": "json-builder"
-, "description": "Big JSON streams without creating big objects."
+, "description": "Big JSON streams for JS without creating big objects."
 , "version": "0.0.1",
 , "homepage": "https://github.com/michaelku/json-builder",
 , "repository": { "type": "git"
