@@ -14,70 +14,87 @@ exports.KEY_IN_LIST = {message: 'Cannot write key in [] only {}.'}
  */
 exports.stream = function jsonStream(stream) {
 
-  // each stack element is a tupel
-  // isMap: true if the stack frame is a {} (otherwise it is a [])
-  // size: number of items in the current {} or []
+  // Each stack element is a tupel (isMap:boolean, size:number)
+  //  isMap: true if the stack frame is a {} (otherwise it is a [])
+  //  size: number of items in the current {} or []
   var stack = []
   var danglingKey = false
 
-  function top() { return stack[stack.length - 1] }
-  function isMap() { return stack.length && top()[0] }
-  function size() { return stack.length ? top()[1] : 0 }
+  function top() {
+    return stack[stack.length - 1];
+  }
+
+  function isMap() {
+    return stack.length && top()[0];
+  }
+
+  function size() {
+    return stack.length ? top()[1] : 0;
+  }
+
+  function incr() {
+    stack[stack.length - 1][1]++;
+  }
+
+  function startValue() {
+    if (!stack.length) return;
+    if (isMap() && !danglingKey) throw exports.NEED_KEY;
+    if (!isMap() && size()) stream.write(',');
+    incr();
+    danglingKey = false;
+  }
 
   // api:
   function map () {
-    stack.push([true, 0])
-    stream.write('{')
-    return api
+    startValue();
+    stack.push([true, 0]);
+    stream.write('{');
+    return api;
   }
 
   function list () {
-    danglingKey = false
-    if (!isMap() && size() > 0) stream.write(',')
-    stack.push([false, 0])
-    stream.write('[')
-    return api
+    startValue();
+    stack.push([false, 0]);
+    stream.write('[');
+    return api;
   }
 
   function close () {
-    if (!stack.length) throw exports.NOTHING_TO_CLOSE
-    if (danglingKey) throw exports.DANGLING_KEY
-    if (isMap()) stream.write('}')
-    else stream.write(']')
-    stack.pop()
-    return api
+    if (!stack.length) throw exports.NOTHING_TO_CLOSE;
+    if (danglingKey) throw exports.DANGLING_KEY;
+    if (isMap()) stream.write('}');
+    else stream.write(']');
+    stack.pop();
+    return api;
   }
 
   function key (key) {
-    if (!isMap()) throw exports.KEY_IN_LIST
-    if (danglingKey) throw exports.DANGLING_KEY
-    if (size() > 0) stream.write(',')
-    stream.write(JSON.stringify(""+key))
-    stream.write(":")
-    danglingKey = true
-    return api
+    if (!isMap()) throw exports.KEY_IN_LIST;
+    if (danglingKey) throw exports.DANGLING_KEY;
+    if (size()) stream.write(',');
+    stream.write(JSON.stringify(""+key));
+    stream.write(":");
+    danglingKey = true;
+    return api;
   }
 
   function val (val) {
-    return json(JSON.stringify(val))
+    return json(JSON.stringify(val));
   }
 
   function json (json) {
-    if (isMap() && !danglingKey) throw exports.NEED_KEY
-    if (!isMap() && size() > 0) stream.write(',')
-    danglingKey = false
-    top()[1]++
-    stream.write(json)
-    return api
+    startValue();
+    stream.write(json);
+    return api;
   }
 
   var api = {
-    map: map
-  , list: list
-  , key: key
-  , val: val
-  , json: json
-  , close: close
+    map: map,
+    list: list,
+    key: key,
+    val: val,
+    json: json,
+    close: close,
   };
 
   return api
